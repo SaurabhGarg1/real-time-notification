@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform: 'AWS::Serverless-2016-10-31'
-Description: An Amazon API Gateway WebSocket API and an AWS Lambda function.
+Description: An Amazon API Gateway WebSocket API with AWS Lambda function and dynamodb and eventbridge.
 
 # Global values that are applied to all applicable resources in this template
 Globals:
@@ -173,7 +173,6 @@ Resources:
     Type: AWS::ApiGatewayV2::Deployment
     DependsOn:
       - OnConnectRoute
-      - PostRoute
       - OnDisconnectRoute
     Properties:
       ApiId: !Ref WebSocketApi
@@ -205,14 +204,8 @@ Resources:
           - 'execute-api:ManageConnections'
           Resource:
           - !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${WebSocketApi}/*'
-      
-  PartnerEventBus: 
-    Type: AWS::Events::EventBus
-    Properties: 
-      EventSourceName: !Ref PartnerEventSource
-      Name: !Ref PartnerEventSource
 
-  sfeventrule:
+  Sfeventrule:
     Type: 'AWS::Events::Rule'
     Properties:
       Description: Salesforce platform Events Rule
@@ -238,7 +231,7 @@ Resources:
       Principal: "events.amazonaws.com"
       SourceArn: 
         Fn::GetAtt: 
-          - "sfeventrule"
+          - "Sfeventrule"
           - "Arn"         
 
 
